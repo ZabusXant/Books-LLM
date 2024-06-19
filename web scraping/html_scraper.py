@@ -1,4 +1,5 @@
 import requests
+from requests import Response
 from bs4 import BeautifulSoup
 from typing import List
 from urllib.parse import urljoin
@@ -12,17 +13,17 @@ class HTML_Scraper:
 
     def collect_links(self):
         req = requests.get(self.home_page)
-        page = BeautifulSoup(req.text, 'lxml')
 
-        self.links.extend(self.scrape_single_page(page))
+        self.links.extend(self.scrape_single_page(req))
 
     @staticmethod
-    def scrape_single_page(soup: BeautifulSoup) -> List[str]:
+    def scrape_single_page(req: Response) -> List[str]:
+        soup = BeautifulSoup(req.text, 'lxml')
         list_of_books = soup.find("ol", class_='row')
         if list_of_books:
             books_links = list_of_books.find_all('li')
             if books_links:
-                return [link.h3.a['href'] for link in books_links]
+                return [urljoin(req.url, link.h3.a['href']) for link in books_links]
 
     def extract_data(self, link: str) -> dict:
         req = requests.get(link)
