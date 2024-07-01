@@ -3,7 +3,7 @@ The intention for this repo is to showcase my web mining skills as well as my ab
 
 As of the moment of this update the project will consist of:
 - HTML scraper (Data extraction complete, processing left)
-- Browser Scraper (Data extraction complete, processing left)
+- Browser Scraper (Finished)
 - LLM implementation on the scraped data (Yet to start)
 
 ## Project description
