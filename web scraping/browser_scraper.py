@@ -2,8 +2,9 @@ from playwright._impl._errors import Error
 from playwright.sync_api import Browser, Page, Response, sync_playwright
 from playwright.sync_api._context_manager import PlaywrightContextManager
 from urllib.parse import urljoin
-from typing import List
-from bs4 import BeautifulSoup
+from typing import List, Optional
+import pandas as pd
+import re
 
 
 class Browser_Scraper:
@@ -104,9 +105,56 @@ class Browser_Scraper:
         for link in self.links:
             self.data.append(self.extract_data(link))
 
+    def process_data(self):
+        df = pd.DataFrame(self.data)
+        df.to_csv("../data/browser_data.csv", index=False, sep='^', encoding='utf-8')
+
+        df['category'] = df['category'].apply(self.process_category)
+        df['price'] = df['price'].apply(self.process_price)
+        df['rating'] = df['rating'].apply(self.process_rating)
+        df['description'] = df['description'].apply(self.process_description)
+        df['availability'] = df['availability'].apply(self.process_availability)
+
+        df.to_csv("../data/browser_data_processed.csv", index=False, sep='^', encoding='utf-8')
+
+    @staticmethod
+    def process_category(st: str) -> str:
+        return "Uncategorized" if st == "Default" else st
+
+    @staticmethod
+    def process_price(st: str) -> float:
+        return float(st.replace("£", ''))
+
+    @staticmethod
+    def process_rating(st: str) -> int:
+        ratings = {
+            "One": 1,
+            "Two": 2,
+            "Three": 3,
+            "Four": 4,
+            "Five": 5
+        }
+
+        return ratings[st]
+
+    @staticmethod
+    def process_description(st: str) -> Optional[str]:
+        if isinstance(st, str):
+            return st[:-8]
+        else:
+            return None
+
+    @staticmethod
+    def process_availability(st: str) -> int:
+        return int(re.sub(r"\D", '', st))
+
+    def run_crawler(self):
+        self.collect_links()
+        self.collect_data()
+        self.process_data()
 
 
 if __name__ == "__main__":
     scraper = Browser_Scraper(False)
-    scraper.collect_data()
+    scraper.run_crawler()
     print('debug')
