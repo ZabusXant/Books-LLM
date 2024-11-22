@@ -5,14 +5,14 @@ The data would later be used to feed an LLM in a RAG setup.
 
 ## Stack used so far
 Extraction process:
-    - python requests
-    - python Beautiful Soup
-    - Playwright for alternative browser scraping
+- python requests
+- python Beautiful Soup
+- Playwright for alternative browser scraping
 
 ETL process:
-    - Data lake: MinIO
-    - Database: PostgreSQL
-    - Orchestration: both Prefect and Airflow
+- Data lake: MinIO
+- Database: PostgreSQL
+- Orchestration: both Prefect and Airflow
 
 
 ## Project description
