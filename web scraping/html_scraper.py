@@ -1,20 +1,33 @@
 import requests
 from requests import Response
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from typing import List
 from urllib.parse import urljoin
+import pandas as pd
 
 
 class HTML_Scraper:
-    links: List[str]
-    data: List[dict]
+    links: List[str] = []
+    data: List[dict] = []
     domain = "https://books.toscrape.com/"
     home_page: str = "https://books.toscrape.com/index.html"
 
     def collect_links(self):
         req = requests.get(self.home_page)
-
+        page = BeautifulSoup(req.text, 'lxml')
         self.links.extend(self.scrape_single_page(req))
+        next_page = page.find("ul", class_='pager').find("li", class_='next')
+
+        page_counter = 1
+        while next_page:
+            next_page = page.find("ul", class_='pager').find("li", class_='next')
+            if next_page:
+                req = requests.get(urljoin(req.url, next_page.a['href']))
+                page = BeautifulSoup(req.text, 'lxml')
+                self.links.extend(self.scrape_single_page(req))
+                page_counter += 1
+                if page_counter % 10 == 0:
+                    print("Went through", page_counter, "pages")
 
     @staticmethod
     def scrape_single_page(req: Response) -> List[str]:
@@ -25,18 +38,34 @@ class HTML_Scraper:
             if books_links:
                 return [urljoin(req.url, link.h3.a['href']) for link in books_links]
 
+    def collect_data(self):
+
+        for link in self.links:
+            self.data.append(self.extract_data(link))
+            if len(self.data) % 100 == 0:
+                print("Extracted", len(self.data), "links.")
+
+        print("Finished with", len(self.data), "records extracted.")
+
     def extract_data(self, link: str) -> dict:
         req = requests.get(link)
+        req.encoding = req.apparent_encoding
         page = BeautifulSoup(req.text, 'lxml')
 
-        book = {}
-        book['category'] = self.scrape_category(page)
-        book['title'] = self.scrape_title(page)
-        book['price'] = self.scrape_price(page)
-        book['rating'] = self.scrape_rating(page)
-
+        book = {'category': self.scrape_category(page),
+                'title': self.scrape_title(page),
+                'price': self.scrape_price(page),
+                'rating': self.scrape_rating(page),
+                'description': self.scrape_book_description(page),
+                'availability': self.scrape_availability(page)}
 
         return book
+
+    @staticmethod
+    def check_next_page(page: BeautifulSoup) -> Tag:
+        check = page.find("ul", class_='pager')
+        if check:
+            return check.find("li", class_='next')
 
     @staticmethod
     def scrape_category(soup: BeautifulSoup) -> str:
@@ -64,8 +93,26 @@ class HTML_Scraper:
 
     @staticmethod
     def scrape_book_description(soup: BeautifulSoup) -> str:
-        check = page.find("div", {"id": "product_description"})
+        check = soup.find("div", {"id": "product_description"})
         if check:
             return check.next_sibling.next_sibling.text.strip()
 
+    @staticmethod
+    def scrape_availability(soup: BeautifulSoup) ->str:
+        check = soup.find("p", class_='instock availability')
+        if check:
+            return check.text.strip()
 
+    def run_crawler(self):
+        self.collect_links()
+        print("Collected", len(self.links), "links")
+        self.collect_data()
+
+        data = pd.DataFrame(self.data)
+        data.to_csv("../data/html_raw_data.csv", index=False, sep='^', encoding='utf-8')
+        print("Saved as html_raw_data.csv successfully.")
+
+
+if __name__ == "__main__":
+    crawler = HTML_Scraper()
+    crawler.run_crawler()
