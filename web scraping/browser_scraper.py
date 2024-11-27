@@ -157,4 +157,3 @@ class Browser_Scraper:
 if __name__ == "__main__":
     scraper = Browser_Scraper(False)
     scraper.run_crawler()
-    print('debug')
