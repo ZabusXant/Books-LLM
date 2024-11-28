@@ -15,6 +15,11 @@ ETL process:
 - Orchestration: both Prefect and Airflow
 
 
+### Creating the docker container and running the services
+This is for the primary introduction of Docker to the project. This section will likely change.
+Just try running `docker-compose up -d` to create the MinIO, Postgres and Airflow containers.
+
+
 ## Project description
 The end goal for this project is to simulate a book selling shop. The source used for the data is https://books.toscrape.com/ which is a website intended to be scraped and contains proxy data.
 The idea is to collect all the data and then have the LLM do the selling of books as well as answer questions and give out suggestion about the books based on the information gathered.
