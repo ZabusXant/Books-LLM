@@ -50,3 +50,12 @@ class MinIO:
             print("File", file_name, "created from dataframe uploaded to bucket", bucket, "successfully")
         except S3Error as e:
             print(f"An error occurred: {e}")
+
+    def download_csv_file_from_minio(self, bucket: str, file_name: str):
+        try:
+            response = self.minio_client.get_object(bucket_name=bucket, object_name=file_name)
+            csv_data = BytesIO(response.read())
+
+            return csv_data
+        except S3Error as e:
+            print(f"An error occurred: {e}")
