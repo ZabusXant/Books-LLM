@@ -4,13 +4,16 @@ from bs4 import BeautifulSoup, Tag
 from typing import List
 from urllib.parse import urljoin
 import pandas as pd
+from scripts.minio_interaction import MinIO
 
 
+# noinspection PyArgumentList
 class HTML_Scraper:
     links: List[str] = []
     data: List[dict] = []
     domain = "https://books.toscrape.com/"
     home_page: str = "https://books.toscrape.com/index.html"
+    minio_client = MinIO
 
     def collect_links(self):
         req = requests.get(self.home_page)
@@ -98,19 +101,23 @@ class HTML_Scraper:
             return check.next_sibling.next_sibling.text.strip()
 
     @staticmethod
-    def scrape_availability(soup: BeautifulSoup) ->str:
+    def scrape_availability(soup: BeautifulSoup) -> str:
         check = soup.find("p", class_='instock availability')
         if check:
             return check.text.strip()
+
+    def store_data(self):
+        data = pd.DataFrame(self.data)
+
+
+        # Uploading directly to MinIO
+        self.minio_client.upload_file_to_minio()
 
     def run_crawler(self):
         self.collect_links()
         print("Collected", len(self.links), "links")
         self.collect_data()
-
-        data = pd.DataFrame(self.data)
-        data.to_csv("../data/html_raw_data.csv", index=False, sep='^', encoding='utf-8')
-        print("Saved as html_raw_data.csv successfully.")
+        self.store_data()
 
 
 if __name__ == "__main__":
