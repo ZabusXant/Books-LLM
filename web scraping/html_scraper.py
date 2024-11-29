@@ -108,10 +108,7 @@ class HTML_Scraper:
 
     def store_data(self):
         data = pd.DataFrame(self.data)
-
-
-        # Uploading directly to MinIO
-        self.minio_client.upload_file_to_minio()
+        self.minio_client.upload_df_to_minio(bucket='raw-data', file_name='html_raw_data.csv', df=data)
 
     def run_crawler(self):
         self.collect_links()
