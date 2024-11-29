@@ -1,7 +1,10 @@
 from minio import Minio
 from minio.error import S3Error
 from dotenv import load_dotenv
+import pandas as pd
+from io import BytesIO
 import os
+
 load_dotenv()
 
 minio_url = os.getenv("MINIO_URL")
@@ -13,7 +16,7 @@ class MinIO:
     minio_client: Minio
 
     def __init__(self):
-        minio_client = Minio(minio_url, access_key=access_key, secret_key=secret_key, secure=False)
+        self.minio_client = Minio(minio_url, access_key=access_key, secret_key=secret_key, secure=False)
 
     def create_bucket(self, bucket_name: str):
         try:
@@ -31,5 +34,19 @@ class MinIO:
                 self.create_bucket(bucket)
             self.minio_client.fput_object(bucket, file_name, file_path)
             print("File", file_name, "uploaded to bucket", bucket, "successfully")
+        except S3Error as e:
+            print(f"An error occurred: {e}")
+
+    def upload_df_to_minio(self, bucket: str, file_name: str, df: pd.DataFrame):
+        try:
+            if not self.minio_client.bucket_exists(bucket):
+                self.create_bucket(bucket)
+
+            csv_buffer = BytesIO()
+            df.to_csv(csv_buffer, index=False, sep='^', encoding='utf-8')
+            csv_buffer.seek(0)
+            self.minio_client.put_object(bucket_name=bucket, object_name=file_name, data=csv_buffer,
+                                         length=len(csv_buffer.getvalue()), content_type="text/csv")
+            print("File", file_name, "created from dataframe uploaded to bucket", bucket, "successfully")
         except S3Error as e:
             print(f"An error occurred: {e}")
