@@ -4,16 +4,18 @@ that would streamline the extraction process, transformation of the data as well
 The data would later be used to feed an LLM in a RAG setup.
 
 ## Stack used so far
-Extraction process:
+### Extraction process:
 - python requests
 - python Beautiful Soup
 - Playwright for alternative browser scraping
 
-ETL process:
+### ETL process:
 - Data lake: MinIO
 - Database: PostgreSQL
 - Orchestration: both Prefect and Airflow
 
+### Other:
+- Messaging management: Redis and Celery
 
 ### Creating the docker container and running the services
 This is for the primary introduction of Docker to the project. This section will likely change.

@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup, Tag
 from typing import List
 from urllib.parse import urljoin
 import pandas as pd
-from scripts.minio_interaction import MinIO
-from scripts.load_cleaned_data import Database
+from src.utils.minio_interaction import MinIO
+from src.utils.postgres_interaction import Database
 
 
 # noinspection PyArgumentList
