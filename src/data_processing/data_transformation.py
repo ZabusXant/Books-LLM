@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from scripts.minio_interaction import MinIO
-from scripts.load_cleaned_data import Database
+from src.utils.minio_interaction import MinIO
+from src.utils.postgres_interaction import Database
 
 
 class Transformer(Database, MinIO):
