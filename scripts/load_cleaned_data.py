@@ -1,5 +1,5 @@
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Engine
 from dotenv import load_dotenv
 import os
 
@@ -9,12 +9,14 @@ password = os.getenv('DB_PASSWORD')
 host = os.getenv('DB_HOST')
 port = os.getenv('DB_PORT')
 database = os.getenv('DB_NAME')
-table_name = 'cleaned_data'
 
-filepath = "../data/processed_data.csv"
 
-engine = create_engine(f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}')
-data = pd.read_csv(filepath, dtype='str', sep='^', encoding='utf-8')
-data.to_sql(table_name, engine, if_exists='replace', index=False)
+class Database:
+    engine: Engine
 
-print("Processed data has been loaded into table cleaned_data successfully")
+    def __init__(self):
+        self.engine = create_engine(f'postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}')
+
+    def upload_df_to_table(self, table_name: str, data: pd.DataFrame):
+        data.to_sql(table_name, self.engine, if_exists='replace', index=False)
+        print("Data has been loaded into table", table_name, "successfully")

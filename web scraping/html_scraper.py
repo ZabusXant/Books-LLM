@@ -5,15 +5,19 @@ from typing import List
 from urllib.parse import urljoin
 import pandas as pd
 from scripts.minio_interaction import MinIO
+from scripts.load_cleaned_data import Database
 
 
 # noinspection PyArgumentList
-class HTML_Scraper:
+class HTML_Scraper(MinIO, Database):
     links: List[str] = []
     data: List[dict] = []
     domain = "https://books.toscrape.com/"
     home_page: str = "https://books.toscrape.com/index.html"
-    minio_client = MinIO
+
+    def __init__(self):
+        MinIO.__init__(self)
+        Database.__init__(self)
 
     def collect_links(self):
         req = requests.get(self.home_page)
@@ -108,7 +112,8 @@ class HTML_Scraper:
 
     def store_data(self):
         data = pd.DataFrame(self.data)
-        self.minio_client.upload_df_to_minio(bucket='raw-data', file_name='html_raw_data.csv', df=data)
+        self.upload_df_to_minio(bucket='raw-data', file_name='html_raw_data.csv', df=data)
+        self.upload_df_to_table(table_name='html_raw_data', data=data)
 
     def run_crawler(self):
         self.collect_links()
