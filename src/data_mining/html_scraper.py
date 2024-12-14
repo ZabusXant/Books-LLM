@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup, Tag
 from typing import List
 from urllib.parse import urljoin
 import pandas as pd
-from src.utils.minio_interaction import MinIO
-from src.utils.postgres_interaction import Database
+from utils.minio_interaction import MinIO
+from utils.postgres_interaction import Database
 
 
 # noinspection PyArgumentList
@@ -120,8 +120,3 @@ class HTML_Scraper(MinIO, Database):
         print("Collected", len(self.links), "links")
         self.collect_data()
         self.store_data()
-
-
-if __name__ == "__main__":
-    crawler = HTML_Scraper()
-    crawler.run_crawler()
