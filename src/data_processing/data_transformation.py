@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from src.utils.minio_interaction import MinIO
-from src.utils.postgres_interaction import Database
+from utils.minio_interaction import MinIO
+from utils.postgres_interaction import Database
 
 
 class Transformer(Database, MinIO):
@@ -35,14 +35,9 @@ class Transformer(Database, MinIO):
     def store_clean_data(self):
         self.upload_df_to_minio(bucket='processed-data', file_name='test_processed_data.csv', df=self.data)
         self.upload_df_to_table(table_name='test_clean_data', data=self.data)
-        print("Data has been processed successfully")
+        print("Data has been processed successfully and uploaded.")
 
     def run_transformer(self):
         self.remove_duplicates()
         self.apply_transformations()
         self.store_clean_data()
-
-
-if __name__ == "__main__":
-    transformer = Transformer()
-    transformer.run_transformer()

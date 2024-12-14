@@ -16,6 +16,7 @@ class MinIO:
     minio_client: Minio
 
     def __init__(self):
+        print(f"Connecting to MinIO with {minio_url} as url and {access_key} as user with password {secret_key}")
         self.minio_client = Minio(minio_url, access_key=access_key, secret_key=secret_key, secure=False)
 
     def create_bucket(self, bucket_name: str):
