@@ -11,7 +11,7 @@ The data would later be used to feed an LLM in a RAG setup.
 
 ### ETL process:
 - Data lake: MinIO
-- Database: PostgreSQL
+- Data warehouse: PostgreSQL
 - Orchestration: both Prefect and Airflow
 
 ### Other:
